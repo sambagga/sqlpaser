@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import edu.buffalo.cse.sql.Schema.Column;
 import edu.buffalo.cse.sql.data.Datum;
+import edu.buffalo.cse.sql.data.Datum.CastError;
+import edu.buffalo.cse.sql.data.Datum.Flt;
 import edu.buffalo.cse.sql.plan.*;
 import edu.buffalo.cse.sql.plan.AggregateNode.AggColumn;
 import edu.buffalo.cse.sql.plan.PlanNode.*;
@@ -172,12 +175,13 @@ class QueryRead {
 	}
 
 	public List<Datum[]> QueryEval(PlanNode q) {
-		List<Datum[]> res = null, left, right;
+		List<Datum[]> res = null, left=null, right=null;
 		switch (q.struct) {
 		case BINARY:
 			Binary bchild = (Binary) q;
 			left = this.QueryEval(bchild.getLHS());
 			right = this.QueryEval(bchild.getRHS());
+			break;
 		case UNARY:
 			Unary uchild = (Unary) q;
 			res = this.QueryEval(uchild.getChild());
@@ -201,6 +205,8 @@ class QueryRead {
 			System.out.println("Scan Query");
 			break;
 		case JOIN:
+			Join j = new Join();
+			res = j.joinTables(left, right, (JoinNode) q);
 			System.out.println("Join Query");
 			break;
 		case NULLSOURCE:
@@ -240,6 +246,7 @@ class Scan {
 					System.out.println(tuple);
 					db.add(tuple);
 				}
+				break;
 			}
 		}
 		return db;
@@ -252,34 +259,144 @@ class Aggregate {
 		List<AggColumn> cols;
 		List<Datum[]> res = new ArrayList<Datum[]>();
 		cols = aNode.getAggregates();
-		int index=0;
-		//facing issues here
+		int index = 0;
+		// facing issues here
 		for (int i = 0; i < cols.size(); i++) {
 			ExprTree exp = cols.get(i).expr;
-			int match=0;
+			int match = 0;
+			Column c = new Column(null, null, null);
 			for (Map.Entry<String, Schema.TableFromFile> iterator : db
 					.entrySet()) {
-				String key = iterator.getKey();
 				Schema.TableFromFile value = iterator.getValue();
 				for (index = 0; index < value.size(); index++) {
-					if (exp.toString() == value.get(index).name.toString()) {
-						match=1;
+					String vname1 = exp.toString();
+					String vname2 = value.get(index).name.name;
+					if (vname1.equals(vname2)) {
+						match = 1;
+						c = value.get(index);
 						break;
 					}
 				}
-				if(match==1)
+				if (match == 1)
 					break;
 			}
+			float ans = 0;
+
 			switch (cols.get(i).aggType) {
 			case SUM:
-				Datum sum;
+				for (Datum[] d : inp) {
+					try {
+						ans = ans + d[index].toFloat();
+					} catch (CastError e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				Datum d = null;
+				switch (c.type) {
+				case INT:
+					d = new Datum.Int((int) ans);
+					break;
+				case FLOAT:
+					d = new Datum.Flt(ans);
+					break;
+				}
+				Datum[] dSum = new Datum[1];
+				dSum[0] = d;
+				res.add(dSum);
+				break;
 			case COUNT:
+				int cn = 0;
+				for (Datum[] count : inp) {
+					cn++;
+				}
+				Datum count = new Datum.Int(cn);
+				Datum[] dCount = new Datum[1];
+				dCount[0] = count;
+				res.add(dCount);
+				break;
 			case AVG:
+				cn = 0;
+				for (Datum[] avg : inp) {
+					try {
+						ans = ans + avg[index].toFloat();
+						cn++;
+					} catch (CastError e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				Datum avg = new Datum.Flt(ans / cn);
+				Datum[] dAvg = new Datum[1];
+				dAvg[0] = avg;
+				res.add(dAvg);
+				break;
 			case MIN:
+				cn = 0;
+				for (Datum[] min : inp) {
+					try {
+						if (cn == 0)
+							ans = min[index].toFloat();
+						else if (ans > min[index].toFloat())
+							ans = min[index].toFloat();
+						cn++;
+					} catch (CastError e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				Datum min = null;
+				switch (c.type) {
+				case INT:
+					min = new Datum.Int((int) ans);
+					break;
+				case FLOAT:
+					min = new Datum.Flt(ans);
+					break;
+				}
+				Datum[] dMin = new Datum[1];
+				dMin[0] = min;
+				res.add(dMin);
+				break;
 			case MAX:
+				cn = 0;
+				for (Datum[] max : inp) {
+					try {
+						if (cn == 0)
+							ans = max[index].toFloat();
+						if (ans < max[index].toFloat())
+							ans = max[index].toFloat();
+						cn++;
+					} catch (CastError e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				Datum max = null;
+				switch (c.type) {
+				case INT:
+					max = new Datum.Int((int) ans);
+					break;
+				case FLOAT:
+					max = new Datum.Flt(ans);
+					break;
+				}
+				Datum[] dMax = new Datum[1];
+				dMax[0] = max;
+				res.add(dMax);
+				break;
 			}
 
 		}
+		return res;
+	}
+}
+
+class Join {
+	public List<Datum[]> joinTables(List<Datum[]> left, List<Datum[]> right,
+			JoinNode q) {
+		List<Datum[]> res = new ArrayList<Datum[]>();
+
 		return res;
 	}
 }

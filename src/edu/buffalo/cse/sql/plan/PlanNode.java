@@ -45,7 +45,7 @@ public abstract class PlanNode {
    * instantiate themselves as being of this type.
    */
   public enum Type { PROJECT, SELECT, SCAN, JOIN, NULLSOURCE, UNION, 
-                     AGGREGATE };
+                     AGGREGATE }; 
 
   /**
    * An abstract implementation of a PlanNode that reads from one input relation

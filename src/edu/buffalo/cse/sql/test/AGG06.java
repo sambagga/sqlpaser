@@ -24,7 +24,7 @@ public class AGG06 extends TestHarness {
     Map<String, Schema.TableFromFile> tables
       = new HashMap<String, Schema.TableFromFile>();
     Schema.TableFromFile table_S;
-    table_S = new Schema.TableFromFile(new File("test/r.dat"));
+    table_S = new Schema.TableFromFile(new File("test/s.dat"));
     table_S.add(new Schema.Column("S", "B", Schema.Type.INT));
     table_S.add(new Schema.Column("S", "C", Schema.Type.INT));
     tables.put("S", table_S);
