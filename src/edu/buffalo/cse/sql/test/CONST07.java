@@ -31,13 +31,18 @@ public class CONST07 extends TestHarness {
     System.out.println("Passed RA Test CONST07");
   }
   public void testSQL() {
-    List<List<Datum[]>> expected = new ArrayList<List<Datum[]>>();
+    List<List<List<Datum[]>>> expected = new ArrayList<List<List<Datum[]>>>();
     expected.add(getResults0());
     TestHarness.testProgram(new File("test/CONST07.SQL"),
                             expected);
     System.out.println("Passed SQL Test CONST07");
   }
-  ArrayList<Datum[]> getResults0() {
+  List<List<Datum[]>> getResults0() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD0());
+    return ret;
+  }
+  ArrayList<Datum[]> getResultsUD0() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(-1)}); 
     return ret;

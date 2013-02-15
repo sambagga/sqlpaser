@@ -24,7 +24,7 @@ public class AGG06 extends TestHarness {
     Map<String, Schema.TableFromFile> tables
       = new HashMap<String, Schema.TableFromFile>();
     Schema.TableFromFile table_S;
-    table_S = new Schema.TableFromFile(new File("test/s.dat"));
+    table_S = new Schema.TableFromFile(new File("test/r.dat"));
     table_S.add(new Schema.Column("S", "B", Schema.Type.INT));
     table_S.add(new Schema.Column("S", "C", Schema.Type.INT));
     tables.put("S", table_S);
@@ -45,13 +45,18 @@ public class AGG06 extends TestHarness {
     System.out.println("Passed RA Test AGG06");
   }
   public void testSQL() {
-    List<List<Datum[]>> expected = new ArrayList<List<Datum[]>>();
+    List<List<List<Datum[]>>> expected = new ArrayList<List<List<Datum[]>>>();
     expected.add(getResults0());
     TestHarness.testProgram(new File("test/AGG06.SQL"),
                             expected);
     System.out.println("Passed SQL Test AGG06");
   }
-  ArrayList<Datum[]> getResults0() {
+  List<List<Datum[]>> getResults0() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD0());
+    return ret;
+  }
+  ArrayList<Datum[]> getResultsUD0() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(100)}); 
     return ret;

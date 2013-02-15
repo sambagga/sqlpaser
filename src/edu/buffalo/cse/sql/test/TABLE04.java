@@ -139,7 +139,7 @@ public class TABLE04 extends TestHarness {
     System.out.println("Passed RA Test TABLE04-8");
   }
   public void testSQL() {
-    List<List<Datum[]>> expected = new ArrayList<List<Datum[]>>();
+    List<List<List<Datum[]>>> expected = new ArrayList<List<List<Datum[]>>>();
     expected.add(getResults0());
     expected.add(getResults1());
     expected.add(getResults2());
@@ -152,7 +152,47 @@ public class TABLE04 extends TestHarness {
                             expected);
     System.out.println("Passed SQL Test TABLE04");
   }
-  ArrayList<Datum[]> getResults0() {
+  List<List<Datum[]>> getResults0() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD0());
+    return ret;
+  }
+  List<List<Datum[]>> getResults1() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD1());
+    return ret;
+  }
+  List<List<Datum[]>> getResults2() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD2());
+    return ret;
+  }
+  List<List<Datum[]>> getResults3() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD3());
+    return ret;
+  }
+  List<List<Datum[]>> getResults4() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD4());
+    return ret;
+  }
+  List<List<Datum[]>> getResults5() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD5());
+    return ret;
+  }
+  List<List<Datum[]>> getResults6() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD6());
+    return ret;
+  }
+  List<List<Datum[]>> getResults7() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD7());
+    return ret;
+  }
+  ArrayList<Datum[]> getResultsUD0() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3)}); 
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(2)}); 
@@ -256,7 +296,7 @@ public class TABLE04 extends TestHarness {
     ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(5)}); 
     return ret;
   }
-  ArrayList<Datum[]> getResults1() {
+  ArrayList<Datum[]> getResultsUD1() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3), new Datum.Int(4), new Datum.Int(3)}); 
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3), new Datum.Int(3), new Datum.Int(2)}); 
@@ -360,7 +400,7 @@ public class TABLE04 extends TestHarness {
     ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2), new Datum.Int(4), new Datum.Int(5)}); 
     return ret;
   }
-  ArrayList<Datum[]> getResults2() {
+  ArrayList<Datum[]> getResultsUD2() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3)}); 
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(2)}); 
@@ -464,7 +504,7 @@ public class TABLE04 extends TestHarness {
     ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(5)}); 
     return ret;
   }
-  ArrayList<Datum[]> getResults3() {
+  ArrayList<Datum[]> getResultsUD3() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3), new Datum.Int(4), new Datum.Int(3)}); 
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3), new Datum.Int(3), new Datum.Int(2)}); 
@@ -568,7 +608,7 @@ public class TABLE04 extends TestHarness {
     ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2), new Datum.Int(4), new Datum.Int(5)}); 
     return ret;
   }
-  ArrayList<Datum[]> getResults4() {
+  ArrayList<Datum[]> getResultsUD4() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(2)}); 
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(1)}); 
@@ -591,7 +631,7 @@ public class TABLE04 extends TestHarness {
     ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(4)}); 
     return ret;
   }
-  ArrayList<Datum[]> getResults5() {
+  ArrayList<Datum[]> getResultsUD5() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3), new Datum.Int(3), new Datum.Int(2)}); 
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3), new Datum.Int(3), new Datum.Int(1)}); 
@@ -614,7 +654,7 @@ public class TABLE04 extends TestHarness {
     ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2), new Datum.Int(2), new Datum.Int(4)}); 
     return ret;
   }
-  ArrayList<Datum[]> getResults6() {
+  ArrayList<Datum[]> getResultsUD6() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(2)}); 
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(1)}); 
@@ -637,7 +677,7 @@ public class TABLE04 extends TestHarness {
     ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(4)}); 
     return ret;
   }
-  ArrayList<Datum[]> getResults7() {
+  ArrayList<Datum[]> getResultsUD7() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3), new Datum.Int(3), new Datum.Int(2)}); 
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3), new Datum.Int(3), new Datum.Int(1)}); 

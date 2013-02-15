@@ -83,12 +83,13 @@ public abstract class TestHarness {
     return output.toString(); 
   }
   
-  public static void validateResults(Collection<Datum[]> results,
+  public static void validateResult(Collection<Datum[]> results,
                                     List<Datum[]> expectedResults,
                                     List<String> colNames)
     throws IncorrectAnswer
   {
     List<Datum[]> unexpectedResults = new ArrayList<Datum[]>();
+    
     for(Datum[] row : results){ 
       // have to iterate manually -- .equals doesn't work on arrays
       int i;
@@ -114,8 +115,23 @@ public abstract class TestHarness {
     }
   }
   
+  public static void validateResults(Collection<Datum[]> results,
+                                     List<List<Datum[]>> expectedPotResults,
+                                     List<String> colNames)
+    throws IncorrectAnswer
+  {
+    IncorrectAnswer ret = null;
+    for(List<Datum[]> potResult : expectedPotResults){
+      try {
+        validateResult(results, potResult, colNames);
+        return;
+      } catch(IncorrectAnswer e){ ret = e; }
+    }
+    if(ret != null){ throw ret; }
+  }
+  
   public static void testQuery(Map<String, Schema.TableFromFile> tables,
-                              List<Datum[]> expectedResults,
+                              List<List<Datum[]>> expectedResults,
                               PlanNode query)
   {
     try {
@@ -140,7 +156,7 @@ public abstract class TestHarness {
   }
   
   public static void testProgram(File programFile,
-                                 List<List<Datum[]>> expectedResults)
+                                 List<List<List<Datum[]>>> expectedResults)
   {
     int queryID = 0;
     try {

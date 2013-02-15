@@ -36,13 +36,18 @@ public class AGG04 extends TestHarness {
     System.out.println("Passed RA Test AGG04");
   }
   public void testSQL() {
-    List<List<Datum[]>> expected = new ArrayList<List<Datum[]>>();
+    List<List<List<Datum[]>>> expected = new ArrayList<List<List<Datum[]>>>();
     expected.add(getResults0());
     TestHarness.testProgram(new File("test/AGG04.SQL"),
                             expected);
     System.out.println("Passed SQL Test AGG04");
   }
-  ArrayList<Datum[]> getResults0() {
+  List<List<Datum[]>> getResults0() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD0());
+    return ret;
+  }
+  ArrayList<Datum[]> getResultsUD0() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(5)}); 
     return ret;

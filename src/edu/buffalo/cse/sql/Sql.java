@@ -9,16 +9,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import edu.buffalo.cse.sql.Schema.Column;
 import edu.buffalo.cse.sql.data.Datum;
 import edu.buffalo.cse.sql.data.Datum.CastError;
-import edu.buffalo.cse.sql.data.Datum.Flt;
-import edu.buffalo.cse.sql.plan.*;
+import edu.buffalo.cse.sql.plan.AggregateNode;
 import edu.buffalo.cse.sql.plan.AggregateNode.AggColumn;
-import edu.buffalo.cse.sql.plan.ExprTree.OpCode;
-import edu.buffalo.cse.sql.plan.PlanNode.*;
+import edu.buffalo.cse.sql.plan.ExprTree;
+import edu.buffalo.cse.sql.plan.JoinNode;
+import edu.buffalo.cse.sql.plan.PlanNode;
+import edu.buffalo.cse.sql.plan.PlanNode.Binary;
+import edu.buffalo.cse.sql.plan.PlanNode.Unary;
+import edu.buffalo.cse.sql.plan.ProjectionNode;
+import edu.buffalo.cse.sql.plan.ScanNode;
+import edu.buffalo.cse.sql.plan.SelectionNode;
 
 public class Sql {
 
@@ -172,7 +176,6 @@ class TupleIterator {
 
 class QueryRead {
 	Map<String, Schema.TableFromFile> db;
-	List<Schema.Var> univSchema = new ArrayList<Schema.Var>();
 
 	public QueryRead(Map<String, Schema.TableFromFile> tables) {
 		db = tables;
@@ -216,13 +219,16 @@ class QueryRead {
 			break;
 		case JOIN:
 			Join j = new Join();
-			res = j.joinTables(left, right, (JoinNode) q, univSchema);
+			res = j.joinTables(left, right, (JoinNode) q);
 			System.out.println("Join Query");
 			break;
 		case NULLSOURCE:
+			res = new ArrayList<Datum[]>();
 			System.out.println("Nullsource Query");
 			break;
 		case UNION:
+			Union u = new Union(left,right);
+			res = u.append();
 			System.out.println("Union Query");
 			break;
 		case AGGREGATE:
@@ -248,19 +254,7 @@ class Project {
 		this.q = q;
 	}
 
-	public static void setAttrIdx(Map<String, Schema.TableFromFile> tables) { // Call
-																				// in
-																				// the
-																				// start
-																				// of
-																				// execQuery
-																				// or
-																				// in
-																				// the
-																				// start
-																				// of
-																				// every
-																				// Projection
+	public static void setAttrIdx(Map<String, Schema.TableFromFile> tables) { 
 		projectionMap.clear();
 		int position = 0;
 		for (Map.Entry<String, Schema.TableFromFile> iterator : tables
@@ -272,11 +266,7 @@ class Project {
 		}
 	}
 
-	public void setAttrIdx(Map<String, Schema.TableFromFile> tables, PlanNode q) { // Call
-																					// When
-																					// returning
-																					// from
-																					// getNext()
+	public void setAttrIdx(Map<String, Schema.TableFromFile> tables, PlanNode q) { 
 		projectionMap.clear();
 		ProjectionNode pNode = (ProjectionNode) q;
 		int position = 0;
@@ -300,27 +290,61 @@ class Project {
 			if (key.equals(attr)) {
 				return projectionMap.get(key);
 			}
-
 		}
-		return 0;
+		return -1;
 	}
 
 	public List<Datum[]> getNext(List<Datum[]> db) {
 
 		ArrayList<Datum[]> pResult = new ArrayList<Datum[]>();
 		ProjectionNode pNode = (ProjectionNode) q;
-		int size = q.getSchemaVars().size(); // size of each tuple
-		for (Datum[] loop1 : db) {
-			int i = 0;
-			Datum[] tup = new Datum[size];
-			for (ProjectionNode.Column c : pNode.getColumns()) {
-				int attrIdx = getAttrIdx(c.expr.toString());
-				tup[i++] = loop1[attrIdx];
+		if(db.size() != 0){
+			int size = q.getSchemaVars().size(); // size of each tuple
+			for (Datum[] loop1 : db) {
+				int i = 0,match=0;
+				Datum[] tup = new Datum[size];
+				for (ProjectionNode.Column c : pNode.getColumns()) {
+					int attrIdx = getAttrIdx(c.expr.toString());
+					if(attrIdx == -1){
+						for (Map.Entry<String, Schema.TableFromFile> iterator : tables
+								.entrySet()) {
+							Map<String, Schema.TableFromFile> temp = new HashMap<String, Schema.TableFromFile>();
+							temp.put(iterator.getKey(), iterator.getValue());
+							setAttrIdx(temp);
+							Schema.TableFromFile value = iterator.getValue();
+							for (int index = 0; index < value.size(); index++) {
+								String vname1 = c.expr.toString();
+								String vname2 = value.get(index).name.name;
+								ScanNode s = (ScanNode) pNode.getChild();
+								if (vname1.equals(vname2) && s.table == value.get(index).name.rangeVariable) {
+									attrIdx = getAttrIdx(value.get(index).name.toString());
+									if(attrIdx > -1)
+										break;
+								}
+							}
+						}
+						
+					}
+					tup[i++] = loop1[attrIdx];
+				}
+				pResult.add(tup);
 			}
-			pResult.add(tup);
-		}
 
-		setAttrIdx(tables, q); // sets according to present q
+			setAttrIdx(tables, q); // sets according to present q
+
+		}else{//NULLSOURCE
+			int size = pNode.getColumns().size();
+			Datum[] res = new Datum[size];
+			int didx = 0;
+			for (ProjectionNode.Column c : pNode.getColumns()) {
+				//System.out.println("File name is ");
+				EvaluateExpr sum = new EvaluateExpr();
+				Datum result = sum.eval(c.expr);
+				res[didx++] = result;
+			}
+			pResult.add(res);
+		}
+		
 		if (!pResult.isEmpty())
 			return pResult;
 		else
@@ -388,13 +412,40 @@ class Aggregate {
 						break;
 				}
 			}
+			if(match==0){
+				for (Map.Entry<String, Schema.TableFromFile> iterator : db
+						.entrySet()) {
+					Schema.TableFromFile value = iterator.getValue();
+					for (index = 0; index < value.size(); index++) {
+						String vname1 = exp.toString();
+						String vname2 = value.get(index).name.name;
+						if (vname1.equals(vname2)) {
+							c = value.get(index);
+							aggrMap.put(vname1, c.getName());
+							match = 1;
+							break;
+						}
+					}
+					if(match == 1)
+						break;
+				}
+			}
 			float ans = 0;
 
 			switch (cols.get(i).aggType) {
 			case SUM:
 				for (Datum[] d : inp) {
 					try {
-						ans = ans + d[index].toFloat();
+						//ans = ans + d[index].toFloat();
+						//aggrMap
+						EvaluateExpr sum = new EvaluateExpr(aggrMap);
+						sum.setTuple(d);
+						Datum result = sum.eval(exp);
+						if(result.getType() == Schema.Type.INT){
+							ans = ans + result.toInt();
+						}else if (result.getType() == Schema.Type.FLOAT){
+							ans = ans + result.toFloat();
+						}
 					} catch (CastError e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -423,7 +474,14 @@ class Aggregate {
 				cn = 0;
 				for (Datum[] avg : inp) {
 					try {
-						ans = ans + avg[index].toFloat();
+						EvaluateExpr average = new EvaluateExpr(aggrMap);
+						average.setTuple(avg);
+						Datum result = average.eval(exp);
+						if(result.getType() == Schema.Type.INT){
+							ans = ans + result.toInt();
+						}else if (result.getType() == Schema.Type.FLOAT){
+							ans = ans + result.toFloat();
+						}
 						cn++;
 					} catch (CastError e) {
 						// TODO Auto-generated catch block
@@ -506,9 +564,8 @@ class Join {
 	}
 
 	public List<Datum[]> joinTables(List<Datum[]> left, List<Datum[]> right,
-			JoinNode q, List<Schema.Var> vars) {
+			JoinNode q) {
 		List<Datum[]> res = new ArrayList<Datum[]>();
-		vars.addAll(q.getSchemaVars());
 		switch (q.getJoinType()) {
 		case NLJ:
 			int cnt = 0;
@@ -557,10 +614,14 @@ class Select {
 }
 
 class EvaluateExpr {
+	
 	Datum[] tuple = null;
 	int result;
-
+	Map<String, String> aggrMap = null;
 	public EvaluateExpr() { // For Simple Evaluate eg: Select 1 + 2
+	}
+	public EvaluateExpr(Map<String, String> aggrMap){
+		this.aggrMap = aggrMap;
 	}
 
 	/*
@@ -812,9 +873,32 @@ class EvaluateExpr {
 		case VAR:
 			ExprTree.VarLeaf var = (ExprTree.VarLeaf) node;
 			int idx = Project.getAttrIdx(var.toString());// check var.tString();
+			if((idx == -1) && (aggrMap != null)){
+				for (String key : aggrMap.keySet()) {
+					if (key.equals(var.toString())) {
+						//aggrMap.get(key);
+						idx = Project.getAttrIdx(aggrMap.get(key));// check var.tString();
+					}
+				}
+			}
+			if(idx == -1) return null;
 			result = tuple[idx];
 			break;
 		}
 		return result;
+	}
+}
+
+class Union{
+	List<Datum[]> left;
+	List<Datum[]> right;
+	public Union(List<Datum[]> l,List<Datum[]> r){
+		left = l;
+		right = r;
+	}
+	public List<Datum[]> append(){
+		for(Datum[] itr:right)
+			left.add(itr);
+		return left;
 	}
 }

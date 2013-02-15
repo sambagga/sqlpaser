@@ -53,13 +53,53 @@ public class UNION07 extends TestHarness {
     System.out.println("Passed RA Test UNION07");
   }
   public void testSQL() {
-    List<List<Datum[]>> expected = new ArrayList<List<Datum[]>>();
+    List<List<List<Datum[]>>> expected = new ArrayList<List<List<Datum[]>>>();
     expected.add(getResults0());
     TestHarness.testProgram(new File("test/UNION07.SQL"),
                             expected);
     System.out.println("Passed SQL Test UNION07");
   }
-  ArrayList<Datum[]> getResults0() {
+  List<List<Datum[]>> getResults0() {
+    List<List<Datum[]>> ret = new ArrayList<List<Datum[]>>();
+    ret.add(getResultsUD0());
+    ret.add(getResultsUA0());
+    return ret;
+  }
+  ArrayList<Datum[]> getResultsUD0() {
+    ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
+    ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(5), new Datum.Int(5)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(1)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(1)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(1)}); 
+    ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(5)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(5)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(5), new Datum.Int(5)}); 
+    ret.add(new Datum[] {new Datum.Int(5), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(3), new Datum.Int(4)}); 
+    ret.add(new Datum[] {new Datum.Int(3), new Datum.Int(4)}); 
+    ret.add(new Datum[] {new Datum.Int(5), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(5)}); 
+    ret.add(new Datum[] {new Datum.Int(2), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2)}); 
+    ret.add(new Datum[] {new Datum.Int(5), new Datum.Int(5)}); 
+    ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2)}); 
+    ret.add(new Datum[] {new Datum.Int(3), new Datum.Int(4)}); 
+    ret.add(new Datum[] {new Datum.Int(5), new Datum.Int(3)}); 
+    return ret;
+  }
+  ArrayList<Datum[]> getResultsUA0() {
     ArrayList<Datum[]> ret = new ArrayList<Datum[]>();
     ret.add(new Datum[] {new Datum.Int(1), new Datum.Int(3)}); 
     ret.add(new Datum[] {new Datum.Int(4), new Datum.Int(2)}); 
