@@ -57,49 +57,45 @@ public interface SQLParserConstants {
   /** RegularExpression Id. */
   int DOUBLE = 28;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 29;
+  int NUMBER = 29;
   /** RegularExpression Id. */
   int EXPONENT = 30;
   /** RegularExpression Id. */
-  int LETTER = 31;
+  int FLOATING_POINT_LITERAL = 31;
   /** RegularExpression Id. */
-  int DIGIT = 32;
+  int SEMICOLON = 32;
   /** RegularExpression Id. */
-  int NUMBER = 33;
+  int COMMA = 33;
   /** RegularExpression Id. */
-  int SEMICOLON = 34;
+  int DOT = 34;
   /** RegularExpression Id. */
-  int COMMA = 35;
+  int LESS = 35;
   /** RegularExpression Id. */
-  int DOT = 36;
+  int LESSEQUAL = 36;
   /** RegularExpression Id. */
-  int LESS = 37;
+  int GREATER = 37;
   /** RegularExpression Id. */
-  int LESSEQUAL = 38;
+  int GREATEREQUAL = 38;
   /** RegularExpression Id. */
-  int GREATER = 39;
+  int EQUAL = 39;
   /** RegularExpression Id. */
-  int GREATEREQUAL = 40;
+  int NOTEQUAL = 40;
   /** RegularExpression Id. */
-  int EQUAL = 41;
+  int MULTIPLY = 41;
   /** RegularExpression Id. */
-  int NOTEQUAL = 42;
+  int DIVIDE = 42;
   /** RegularExpression Id. */
-  int MULTIPLY = 43;
+  int PLUS = 43;
   /** RegularExpression Id. */
-  int DIVIDE = 44;
+  int MINUS = 44;
   /** RegularExpression Id. */
-  int PLUS = 45;
+  int QUOTE = 45;
   /** RegularExpression Id. */
-  int MINUS = 46;
+  int OPEN = 46;
   /** RegularExpression Id. */
-  int QUOTE = 47;
+  int CLOSE = 47;
   /** RegularExpression Id. */
-  int OPEN = 48;
-  /** RegularExpression Id. */
-  int CLOSE = 49;
-  /** RegularExpression Id. */
-  int COMMENT = 50;
+  int COMMENT = 48;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -135,11 +131,9 @@ public interface SQLParserConstants {
     "\"string\"",
     "\"boolean\"",
     "\"double\"",
-    "<FLOATING_POINT_LITERAL>",
-    "<EXPONENT>",
-    "<LETTER>",
-    "<DIGIT>",
     "<NUMBER>",
+    "<EXPONENT>",
+    "<FLOATING_POINT_LITERAL>",
     "\";\"",
     "\",\"",
     "\".\"",
