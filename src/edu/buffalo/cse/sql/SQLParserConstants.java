@@ -27,77 +27,79 @@ public interface SQLParserConstants {
   /** RegularExpression Id. */
   int BY = 13;
   /** RegularExpression Id. */
-  int AND = 14;
+  int UNION = 14;
   /** RegularExpression Id. */
-  int AS = 15;
+  int AND = 15;
   /** RegularExpression Id. */
-  int ASC = 16;
+  int AS = 16;
   /** RegularExpression Id. */
-  int DESC = 17;
+  int ASC = 17;
   /** RegularExpression Id. */
-  int OR = 18;
+  int DESC = 18;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 19;
+  int OR = 19;
   /** RegularExpression Id. */
-  int FILEPATH = 20;
+  int STRING_LITERAL = 20;
   /** RegularExpression Id. */
-  int FILE_NAME = 21;
+  int FILEPATH = 21;
   /** RegularExpression Id. */
-  int INTEGER = 22;
+  int FILE_NAME = 22;
   /** RegularExpression Id. */
-  int DATE = 23;
+  int INTEGER = 23;
   /** RegularExpression Id. */
-  int FLOAT = 24;
+  int DATE = 24;
   /** RegularExpression Id. */
-  int STRING = 25;
+  int FLOAT = 25;
   /** RegularExpression Id. */
-  int BOOLEAN = 26;
+  int STRING = 26;
   /** RegularExpression Id. */
-  int DOUBLE = 27;
+  int BOOLEAN = 27;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 28;
+  int DOUBLE = 28;
   /** RegularExpression Id. */
-  int EXPONENT = 29;
+  int FLOATING_POINT_LITERAL = 29;
   /** RegularExpression Id. */
-  int LETTER = 30;
+  int EXPONENT = 30;
   /** RegularExpression Id. */
-  int DIGIT = 31;
+  int LETTER = 31;
   /** RegularExpression Id. */
-  int NUMBER = 32;
+  int DIGIT = 32;
   /** RegularExpression Id. */
-  int SEMICOLON = 33;
+  int NUMBER = 33;
   /** RegularExpression Id. */
-  int COMMA = 34;
+  int SEMICOLON = 34;
   /** RegularExpression Id. */
-  int DOT = 35;
+  int COMMA = 35;
   /** RegularExpression Id. */
-  int LESS = 36;
+  int DOT = 36;
   /** RegularExpression Id. */
-  int LESSEQUAL = 37;
+  int LESS = 37;
   /** RegularExpression Id. */
-  int GREATER = 38;
+  int LESSEQUAL = 38;
   /** RegularExpression Id. */
-  int GREATEREQUAL = 39;
+  int GREATER = 39;
   /** RegularExpression Id. */
-  int EQUAL = 40;
+  int GREATEREQUAL = 40;
   /** RegularExpression Id. */
-  int NOTEQUAL = 41;
+  int EQUAL = 41;
   /** RegularExpression Id. */
-  int MULTIPLY = 42;
+  int NOTEQUAL = 42;
   /** RegularExpression Id. */
-  int DIVIDE = 43;
+  int MULTIPLY = 43;
   /** RegularExpression Id. */
-  int PLUS = 44;
+  int DIVIDE = 44;
   /** RegularExpression Id. */
-  int MINUS = 45;
+  int PLUS = 45;
   /** RegularExpression Id. */
-  int QUOTE = 46;
+  int MINUS = 46;
   /** RegularExpression Id. */
-  int OPEN = 47;
+  int QUOTE = 47;
   /** RegularExpression Id. */
-  int CLOSE = 48;
+  int OPEN = 48;
   /** RegularExpression Id. */
-  int COMMENT = 49;
+  int CLOSE = 49;
+  /** RegularExpression Id. */
+  int COMMENT = 50;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -118,6 +120,7 @@ public interface SQLParserConstants {
     "\"ON\"",
     "\"GROUP\"",
     "\"BY\"",
+    "\"UNION\"",
     "\"AND\"",
     "\"AS\"",
     "\"ASC\"",
