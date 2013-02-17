@@ -3,6 +3,7 @@ package edu.buffalo.cse.sql;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,31 +38,30 @@ public class Sql {
 		System.out.println("Processing the Q: " + q.toString());
 		boolean a = tables.containsKey("R");
 		System.out.println("R is the key present " + a);
-		// for (Map.Entry<String, Schema.TableFromFile> iterator : tables
-		// .entrySet()) {
-		// File file = iterator.getValue().getFile(); // read file for data
-		// System.out.println("File name is " + file.toString());
-		//
-		// TupleIterator tblItr = new TupleIterator(iterator.getValue());
-		//
-		// Datum[] tuple;
-		// while (tblItr.hasNext()) {
-		// tuple = tblItr.readNext();
-		// System.out.println(tuple);
-		//
-		// }
-		// }
 		QueryRead queRead = new QueryRead(tables);
 		List<Datum[]> res = queRead.QueryEval(q);
-		// Schema.Column tableColumns =
-
-		// throw new SqlException("execQuery() is unimplemented");
 		return res;
 	}
 
 	public static List<List<Datum[]>> execFile(File program)
 			throws SqlException {
-		throw new SqlException("execQuery() is unimplemented");
+		Map<String, Schema.TableFromFile> tables = new HashMap<String, Schema.TableFromFile>();
+        List<PlanNode> q = null;
+        try{
+            SQLParser myparser = new SQLParser(new FileReader(program.getPath()));
+            try{
+                q = myparser.initParser(tables);
+                List<List<Datum[]>> res = new ArrayList<List<Datum[]>>();
+                for(PlanNode iter : q)
+                	res.add(execQuery(tables, iter));
+                return res;
+            }catch(ParseException e1){
+               
+            }
+        }catch(FileNotFoundException e){
+           
+        }
+        return null;
 	}
 }
 
@@ -316,7 +316,7 @@ class Project {
 								String vname1 = c.expr.toString();
 								String vname2 = value.get(index).name.name;
 								ScanNode s = (ScanNode) pNode.getChild();
-								if (vname1.equals(vname2) && s.table == value.get(index).name.rangeVariable) {
+								if (vname1.equals(vname2) && s.table.equals(value.get(index).name.rangeVariable)) {
 									attrIdx = getAttrIdx(value.get(index).name.toString());
 									if(attrIdx > -1)
 										break;
@@ -358,7 +358,7 @@ class Scan {
 		List<Datum[]> db = new ArrayList<Datum[]>();
 		for (Map.Entry<String, Schema.TableFromFile> iterator : tables
 				.entrySet()) {
-			if (q.table == iterator.getKey()) {
+			if (q.table.equals(iterator.getKey())) {
 				File file = iterator.getValue().getFile(); // read file for data
 				System.out.println("File name is " + file.toString());
 
