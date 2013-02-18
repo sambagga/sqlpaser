@@ -136,15 +136,11 @@ public class SQLParser implements SQLParserConstants {
           nullchild = new NullSourceNode(1);
           flt = 1;
           break;
-        case FLOATING_POINT_LITERAL:
-          col = jj_consume_token(FLOATING_POINT_LITERAL);
-          nullchild = new NullSourceNode(1);
-          flt = 2;
-          break;
         case NOT:
         case TRUE:
         case FALSE:
         case NUMBER:
+        case FLOATING_POINT_LITERAL:
         case QUOTE:
           lhs = exprTerm();
           if (lhs != null) flagExpression = true;
@@ -501,17 +497,25 @@ public class SQLParser implements SQLParserConstants {
         ;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case SEMICOLON:
-        jj_consume_token(SEMICOLON);
-        break;
       case UNION:
-        union = jj_consume_token(UNION);
+      case SEMICOLON:
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case SEMICOLON:
+          jj_consume_token(SEMICOLON);
+          break;
+        case UNION:
+          union = jj_consume_token(UNION);
         if (union != null) unode++;
+          break;
+        default:
+          jj_la1[22] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
         break;
       default:
-        jj_la1[22] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+        jj_la1[23] = jj_gen;
+        ;
       }
       if (flagExpression || (col != null))
       {
@@ -556,7 +560,7 @@ public class SQLParser implements SQLParserConstants {
         ;
         break;
       default:
-        jj_la1[23] = jj_gen;
+        jj_la1[24] = jj_gen;
         break label_3;
       }
     }
@@ -581,7 +585,7 @@ public class SQLParser implements SQLParserConstants {
         ;
         break;
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[25] = jj_gen;
         break label_7;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -590,7 +594,7 @@ public class SQLParser implements SQLParserConstants {
         if (open.image != null) flag++;
         break;
       default:
-        jj_la1[25] = jj_gen;
+        jj_la1[26] = jj_gen;
         ;
       }
       lhs = queryTerm();
@@ -600,7 +604,7 @@ public class SQLParser implements SQLParserConstants {
         if (close.image != null) flag--;
         break;
       default:
-        jj_la1[26] = jj_gen;
+        jj_la1[27] = jj_gen;
         ;
       }
       label_8:
@@ -611,7 +615,7 @@ public class SQLParser implements SQLParserConstants {
           ;
           break;
         default:
-          jj_la1[27] = jj_gen;
+          jj_la1[28] = jj_gen;
           break label_8;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -630,7 +634,7 @@ public class SQLParser implements SQLParserConstants {
               ;
               break;
             default:
-              jj_la1[28] = jj_gen;
+              jj_la1[29] = jj_gen;
               break label_9;
             }
           }
@@ -644,7 +648,7 @@ public class SQLParser implements SQLParserConstants {
               ;
               break;
             default:
-              jj_la1[29] = jj_gen;
+              jj_la1[30] = jj_gen;
               break label_10;
             }
           }
@@ -715,7 +719,7 @@ public class SQLParser implements SQLParserConstants {
               ;
               break;
             default:
-              jj_la1[30] = jj_gen;
+              jj_la1[31] = jj_gen;
               break label_11;
             }
           }
@@ -729,7 +733,7 @@ public class SQLParser implements SQLParserConstants {
               ;
               break;
             default:
-              jj_la1[31] = jj_gen;
+              jj_la1[32] = jj_gen;
               break label_12;
             }
           }
@@ -786,7 +790,7 @@ public class SQLParser implements SQLParserConstants {
         }
           break;
         default:
-          jj_la1[32] = jj_gen;
+          jj_la1[33] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -844,7 +848,7 @@ public class SQLParser implements SQLParserConstants {
           close = jj_consume_token(CLOSE);
           break;
         default:
-          jj_la1[33] = jj_gen;
+          jj_la1[34] = jj_gen;
           ;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -870,18 +874,18 @@ public class SQLParser implements SQLParserConstants {
         rootOp = ExprTree.OpCode.SUB;
             break;
           default:
-            jj_la1[34] = jj_gen;
+            jj_la1[35] = jj_gen;
             jj_consume_token(-1);
             throw new ParseException();
           }
           break;
         default:
-          jj_la1[35] = jj_gen;
+          jj_la1[36] = jj_gen;
           ;
         }
         break;
       default:
-        jj_la1[36] = jj_gen;
+        jj_la1[37] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -896,7 +900,7 @@ public class SQLParser implements SQLParserConstants {
         ;
         break;
       default:
-        jj_la1[37] = jj_gen;
+        jj_la1[38] = jj_gen;
         break label_13;
       }
     }
@@ -909,23 +913,28 @@ public class SQLParser implements SQLParserConstants {
   ExprTree.OpCode rootOp = null;
   ExprTree rhs = null;
   ExprTree rootExpr = null;
+  Token checkSColon = null;
+  Boolean isFloat = false, isInt = false, isBool = false;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOT:
       notCheck = jj_consume_token(NOT);
       break;
     default:
-      jj_la1[38] = jj_gen;
+      jj_la1[39] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case FLOATING_POINT_LITERAL:
       lc = jj_consume_token(FLOATING_POINT_LITERAL);
+      isFloat = true;
       break;
     case NUMBER:
       lc = jj_consume_token(NUMBER);
+          isInt = true;
       break;
     case TRUE:
       lc = jj_consume_token(TRUE);
+                isBool = true;
       break;
     case FALSE:
       lc = jj_consume_token(FALSE);
@@ -934,10 +943,13 @@ public class SQLParser implements SQLParserConstants {
       lc = jj_consume_token(QUOTE);
       break;
     default:
-      jj_la1[39] = jj_gen;
+      jj_la1[40] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+                //if(checkSColon != null)
+                {
+                }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AND:
     case OR:
@@ -973,18 +985,19 @@ public class SQLParser implements SQLParserConstants {
         exp = jj_consume_token(STRING_SLASH);
         break;
       default:
-        jj_la1[40] = jj_gen;
+        jj_la1[41] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[41] = jj_gen;
+      jj_la1[42] = jj_gen;
       ;
     }
     if (exp == null)
     {
-      if (notCheck != null) {if (true) return new ExprTree(ExprTree.OpCode.NOT, new ExprTree.ConstLeaf(Boolean.parseBoolean(lc.image)));}
+      if(isFloat == true) {if (true) return new ExprTree.ConstLeaf(Float.parseFloat(lc.image));}
+      else if (notCheck != null) {if (true) return new ExprTree(ExprTree.OpCode.NOT, new ExprTree.ConstLeaf(Boolean.parseBoolean(lc.image)));}
       else if (lc.image.toUpperCase().equals("TRUE") || lc.image.toUpperCase().equals("FALSE")) {if (true) return new ExprTree.ConstLeaf(Boolean.parseBoolean(lc.image));}
       else {if (true) return new ExprTree.ConstLeaf(Integer.parseInt(lc.image));}
     }
@@ -1007,13 +1020,13 @@ public class SQLParser implements SQLParserConstants {
         rc = jj_consume_token(QUOTE);
         break;
       default:
-        jj_la1[42] = jj_gen;
+        jj_la1[43] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[43] = jj_gen;
+      jj_la1[44] = jj_gen;
       ;
     }
     if (lc.image.equals("'"))
@@ -1051,6 +1064,9 @@ public class SQLParser implements SQLParserConstants {
     }
     else if (exp.image.equals("*"))
     {
+      if(isFloat == true)
+                rootExpr = new ExprTree(ExprTree.OpCode.MULT, new ExprTree.ConstLeaf(Float.parseFloat(lc.image)), new ExprTree.ConstLeaf(Float.parseFloat(rc.image)));
+      else
       rootExpr = new ExprTree(ExprTree.OpCode.MULT, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
     }
     else if (exp.image.equals("/"))
@@ -1106,7 +1122,7 @@ public class SQLParser implements SQLParserConstants {
         rootOpCode = ExprTree.OpCode.GTE;
       break;
     default:
-      jj_la1[44] = jj_gen;
+      jj_la1[45] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1128,7 +1144,7 @@ public class SQLParser implements SQLParserConstants {
   static public Token jj_nt;
   static private int jj_ntk;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[45];
+  static final private int[] jj_la1 = new int[46];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -1136,10 +1152,10 @@ public class SQLParser implements SQLParserConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x80,0x1000000,0x0,0x1700000,0x10000,0x1000000,0x0,0x0,0x0,0x10000,0x10000,0x0,0x1700000,0x200,0x200,0x200,0x200,0x1000000,0x1000000,0x400,0x800,0x100,0x4000,0x40,0x1000000,0x0,0x0,0x88000,0x0,0x0,0x0,0x0,0x88000,0x0,0x0,0x0,0x700000,0x700000,0x100000,0x600000,0x3088000,0x3088000,0x600000,0x600000,0x0,};
+      jj_la1_0 = new int[] {0x80,0x1000000,0x0,0x1700000,0x10000,0x1000000,0x0,0x0,0x0,0x10000,0x10000,0x0,0x1700000,0x200,0x200,0x200,0x200,0x1000000,0x1000000,0x400,0x800,0x100,0x4000,0x4000,0x40,0x1000000,0x0,0x0,0x88000,0x0,0x0,0x0,0x0,0x88000,0x0,0x0,0x0,0x700000,0x700000,0x100000,0x600000,0x3088000,0x3088000,0x600000,0x600000,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x80,0x18002c,0x100100,0x8000,0x78000,0x78000,0x200000,0x100100,0x0,0x80,0x18002c,0x80,0x80,0x80,0x80,0x0,0x0,0x0,0x0,0x0,0x40,0x0,0x100000,0x100000,0x200000,0x0,0x100000,0x200000,0x100000,0x200000,0x0,0x200000,0x78000,0x78000,0x180024,0x180024,0x0,0x80024,0x78000,0x78000,0x80004,0x80004,0x7e00,};
+      jj_la1_1 = new int[] {0x0,0x0,0x80,0x18002c,0x100100,0x8000,0x78000,0x78000,0x200000,0x100100,0x0,0x80,0x18002c,0x80,0x80,0x80,0x80,0x0,0x0,0x0,0x0,0x0,0x40,0x40,0x0,0x100000,0x100000,0x200000,0x0,0x100000,0x200000,0x100000,0x200000,0x0,0x200000,0x78000,0x78000,0x180024,0x180024,0x0,0x80024,0x78000,0x78000,0x80004,0x80004,0x7e00,};
    }
 
   /** Constructor with InputStream. */
@@ -1160,7 +1176,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1174,7 +1190,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1191,7 +1207,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1201,7 +1217,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1217,7 +1233,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1226,7 +1242,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
   static private Token jj_consume_token(int kind) throws ParseException {
@@ -1282,7 +1298,7 @@ public class SQLParser implements SQLParserConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 45; i++) {
+    for (int i = 0; i < 46; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
