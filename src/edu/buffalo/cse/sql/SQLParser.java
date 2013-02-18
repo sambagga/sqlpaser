@@ -111,8 +111,8 @@ public class SQLParser implements SQLParserConstants {
   }
 
   static final public List < PlanNode > initPlannode(Map < String, Schema.TableFromFile > tables) throws ParseException {
-  Token table = null, var = null, open = null, close = null, union = null;
-  Token exp = null, var2 = null, col = null, col2 = null, exp2 = null;
+  Token table = null, var = null, open = null, close = null, exp = null;
+  Token var2 = null, col = null, col2 = null, exp2 = null, union = null, as = null;
   JoinNode lhs_join = null, rhs_join = null, jroot = null;
   ExprTree lhs = null, rhs = null, root = null;
   List < PlanNode > q = new ArrayList < PlanNode > ();
@@ -124,23 +124,37 @@ public class SQLParser implements SQLParserConstants {
   Token ans = null;
   Boolean flagExpression = false;
   ExprTree.OpCode rootOp = null;
+  Token t = null;
     label_3:
     while (true) {
       jj_consume_token(SELECT);
       label_4:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case STRING_LITERAL:
-          table = jj_consume_token(STRING_LITERAL);
+        case NEGATIVE:
+          col = jj_consume_token(NEGATIVE);
+          nullchild = new NullSourceNode(1);
+          flt = 1;
           break;
+        case FLOATING_POINT_LITERAL:
+          col = jj_consume_token(FLOATING_POINT_LITERAL);
+          nullchild = new NullSourceNode(1);
+          flt = 2;
+          break;
+        case NOT:
+        case TRUE:
+        case FALSE:
         case NUMBER:
-        case MULTIPLY:
-        case DIVIDE:
-        case PLUS:
-        case MINUS:
-        case OPEN:
+        case QUOTE:
           lhs = exprTerm();
           if (lhs != null) flagExpression = true;
+          break;
+        case OPEN:
+          lhs = selectExpr();
+          if (lhs != null) flagExpression = true;
+          break;
+        case STRING_LITERAL:
+          table = jj_consume_token(STRING_LITERAL);
           break;
         default:
           jj_la1[3] = jj_gen;
@@ -148,76 +162,98 @@ public class SQLParser implements SQLParserConstants {
           throw new ParseException();
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case AS:
         case DOT:
         case OPEN:
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
           case DOT:
             jj_consume_token(DOT);
-            var = jj_consume_token(STRING_LITERAL);
             break;
           case OPEN:
             open = jj_consume_token(OPEN);
-            switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-            case STRING_LITERAL:
-              var = jj_consume_token(STRING_LITERAL);
-              break;
-            case MULTIPLY:
-              var = jj_consume_token(MULTIPLY);
-              break;
-            default:
-              jj_la1[4] = jj_gen;
-              jj_consume_token(-1);
-              throw new ParseException();
-            }
-            label_5:
-            while (true) {
-              switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-              case MULTIPLY:
-              case DIVIDE:
-              case PLUS:
-              case MINUS:
-                ;
-                break;
-              default:
-                jj_la1[5] = jj_gen;
-                break label_5;
-              }
-              switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-              case PLUS:
-                exp = jj_consume_token(PLUS);
-                break;
-              case MULTIPLY:
-                exp = jj_consume_token(MULTIPLY);
-                break;
-              case DIVIDE:
-                exp = jj_consume_token(DIVIDE);
-                break;
-              case MINUS:
-                exp = jj_consume_token(MINUS);
-                break;
-              default:
-                jj_la1[6] = jj_gen;
-                jj_consume_token(-1);
-                throw new ParseException();
-              }
-              var2 = jj_consume_token(STRING_LITERAL);
-            }
-            close = jj_consume_token(CLOSE);
+            break;
+          case AS:
+            as = jj_consume_token(AS);
             break;
           default:
-            jj_la1[7] = jj_gen;
+            jj_la1[4] = jj_gen;
             jj_consume_token(-1);
             throw new ParseException();
           }
+          switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+          case STRING_LITERAL:
+            var = jj_consume_token(STRING_LITERAL);
+            break;
+          case MULTIPLY:
+            var = jj_consume_token(MULTIPLY);
+            break;
+          default:
+            jj_la1[5] = jj_gen;
+            jj_consume_token(-1);
+            throw new ParseException();
+          }
+          label_5:
+          while (true) {
+            switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+            case MULTIPLY:
+            case DIVIDE:
+            case PLUS:
+            case MINUS:
+              ;
+              break;
+            default:
+              jj_la1[6] = jj_gen;
+              break label_5;
+            }
+            switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+            case PLUS:
+              exp = jj_consume_token(PLUS);
+              break;
+            case MULTIPLY:
+              exp = jj_consume_token(MULTIPLY);
+              break;
+            case DIVIDE:
+              exp = jj_consume_token(DIVIDE);
+              break;
+            case MINUS:
+              exp = jj_consume_token(MINUS);
+              break;
+            default:
+              jj_la1[7] = jj_gen;
+              jj_consume_token(-1);
+              throw new ParseException();
+            }
+            var2 = jj_consume_token(STRING_LITERAL);
+          }
+          switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+          case CLOSE:
+            close = jj_consume_token(CLOSE);
+            break;
+          default:
+            jj_la1[8] = jj_gen;
+            ;
+          }
           break;
         default:
-          jj_la1[8] = jj_gen;
+          jj_la1[9] = jj_gen;
           ;
         }
         if (flagExpression == true)
         {
-          query_0 = new ProjectionNode();
-          ((ProjectionNode) query_0).addColumn(new ProjectionNode.Column("EXPR", lhs));
+          if (as == null)
+          {
+            query_0 = new ProjectionNode();
+            ((ProjectionNode) query_0).addColumn(new ProjectionNode.Column("EXPR", lhs));
+          }
+          else
+          {
+            if (un == 0)
+            {
+              query_0 = new ProjectionNode();
+              un = 1;
+            }
+            ((ProjectionNode) query_0).addColumn(new ProjectionNode.Column(var.image, lhs));
+          }
         }
         else if (open == null)
         {
@@ -283,7 +319,7 @@ public class SQLParser implements SQLParserConstants {
           jj_consume_token(STRING_LITERAL);
           break;
         default:
-          jj_la1[9] = jj_gen;
+          jj_la1[10] = jj_gen;
           ;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -291,21 +327,23 @@ public class SQLParser implements SQLParserConstants {
           jj_consume_token(COMMA);
           break;
         default:
-          jj_la1[10] = jj_gen;
+          jj_la1[11] = jj_gen;
           ;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case NOT:
+        case TRUE:
+        case FALSE:
         case STRING_LITERAL:
         case NUMBER:
-        case MULTIPLY:
-        case DIVIDE:
-        case PLUS:
-        case MINUS:
+        case NEGATIVE:
+        case FLOATING_POINT_LITERAL:
+        case QUOTE:
         case OPEN:
           ;
           break;
         default:
-          jj_la1[11] = jj_gen;
+          jj_la1[12] = jj_gen;
           break label_4;
         }
       }
@@ -326,13 +364,13 @@ public class SQLParser implements SQLParserConstants {
               jj_consume_token(JOIN);
               break;
             default:
-              jj_la1[12] = jj_gen;
+              jj_la1[13] = jj_gen;
               jj_consume_token(-1);
               throw new ParseException();
             }
             break;
           default:
-            jj_la1[13] = jj_gen;
+            jj_la1[14] = jj_gen;
             ;
           }
             for (Map.Entry < String, Schema.TableFromFile > iterator : tables.entrySet())
@@ -356,13 +394,13 @@ public class SQLParser implements SQLParserConstants {
                 jj_consume_token(JOIN);
                 break;
               default:
-                jj_la1[14] = jj_gen;
+                jj_la1[15] = jj_gen;
                 jj_consume_token(-1);
                 throw new ParseException();
               }
               break;
             default:
-              jj_la1[15] = jj_gen;
+              jj_la1[16] = jj_gen;
               ;
             }
             for (Map.Entry < String, Schema.TableFromFile > iterator : tables.entrySet())
@@ -374,7 +412,7 @@ public class SQLParser implements SQLParserConstants {
             }
             break;
           default:
-            jj_la1[16] = jj_gen;
+            jj_la1[17] = jj_gen;
             ;
           }
           if (lhs_scan != null && rhs_scan != null)
@@ -425,7 +463,7 @@ public class SQLParser implements SQLParserConstants {
             ;
             break;
           default:
-            jj_la1[17] = jj_gen;
+            jj_la1[18] = jj_gen;
             break label_6;
           }
         }
@@ -443,7 +481,7 @@ public class SQLParser implements SQLParserConstants {
           exec = 1;
           break;
         default:
-          jj_la1[18] = jj_gen;
+          jj_la1[19] = jj_gen;
           ;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -454,12 +492,12 @@ public class SQLParser implements SQLParserConstants {
           exec = 1;
           break;
         default:
-          jj_la1[19] = jj_gen;
+          jj_la1[20] = jj_gen;
           ;
         }
         break;
       default:
-        jj_la1[20] = jj_gen;
+        jj_la1[21] = jj_gen;
         ;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -471,14 +509,13 @@ public class SQLParser implements SQLParserConstants {
         if (union != null) unode++;
         break;
       default:
-        jj_la1[21] = jj_gen;
+        jj_la1[22] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
-      if (flagExpression)
+      if (flagExpression || (col != null))
       {
         query_0.setChild(nullchild);
-        flagExpression = false;
       }
       else if (exec == 0) query_0.setChild(jroot);
       else if (exec == - 1) query_0.setChild(lhs_scan);
@@ -502,14 +539,14 @@ public class SQLParser implements SQLParserConstants {
       }
       else if (union == null && unode > 0)
       {
-        if(unode == 1)
+        if (unode == 1)
         {
           uquery.setRHS(query_0);
         }
-        if(unode == 2)
+        if (unode == 2)
         {
-                uquery.setLHS(temp);
-                uquery.setRHS(query_0);
+          uquery.setLHS(temp);
+          uquery.setRHS(query_0);
         }
         q.add(uquery);
       }
@@ -519,7 +556,7 @@ public class SQLParser implements SQLParserConstants {
         ;
         break;
       default:
-        jj_la1[22] = jj_gen;
+        jj_la1[23] = jj_gen;
         break label_3;
       }
     }
@@ -544,7 +581,7 @@ public class SQLParser implements SQLParserConstants {
         ;
         break;
       default:
-        jj_la1[23] = jj_gen;
+        jj_la1[24] = jj_gen;
         break label_7;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -553,7 +590,7 @@ public class SQLParser implements SQLParserConstants {
         if (open.image != null) flag++;
         break;
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[25] = jj_gen;
         ;
       }
       lhs = queryTerm();
@@ -563,7 +600,7 @@ public class SQLParser implements SQLParserConstants {
         if (close.image != null) flag--;
         break;
       default:
-        jj_la1[25] = jj_gen;
+        jj_la1[26] = jj_gen;
         ;
       }
       label_8:
@@ -574,7 +611,7 @@ public class SQLParser implements SQLParserConstants {
           ;
           break;
         default:
-          jj_la1[26] = jj_gen;
+          jj_la1[27] = jj_gen;
           break label_8;
         }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -593,7 +630,7 @@ public class SQLParser implements SQLParserConstants {
               ;
               break;
             default:
-              jj_la1[27] = jj_gen;
+              jj_la1[28] = jj_gen;
               break label_9;
             }
           }
@@ -607,7 +644,7 @@ public class SQLParser implements SQLParserConstants {
               ;
               break;
             default:
-              jj_la1[28] = jj_gen;
+              jj_la1[29] = jj_gen;
               break label_10;
             }
           }
@@ -678,7 +715,7 @@ public class SQLParser implements SQLParserConstants {
               ;
               break;
             default:
-              jj_la1[29] = jj_gen;
+              jj_la1[30] = jj_gen;
               break label_11;
             }
           }
@@ -692,7 +729,7 @@ public class SQLParser implements SQLParserConstants {
               ;
               break;
             default:
-              jj_la1[30] = jj_gen;
+              jj_la1[31] = jj_gen;
               break label_12;
             }
           }
@@ -749,7 +786,7 @@ public class SQLParser implements SQLParserConstants {
         }
           break;
         default:
-          jj_la1[31] = jj_gen;
+          jj_la1[32] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -768,30 +805,148 @@ public class SQLParser implements SQLParserConstants {
     }
   }
 
-  static final public ExprTree exprTerm() throws ParseException {
-  Token lc = null, rc = null, exp = null, open = null;
-  int no = 1;
+  static final public ExprTree selectExpr() throws ParseException {
+  Token open = null, ans = null;
+  ExprTree lhs = null, rhs = null, root = null;
+  Boolean flagExpression = false;
+  int flag = 0;
   ExprTree.OpCode rootOp = null;
-  ExprTree lhs = null, rhs = null;
-  ExprTree rootExpr = null;
+  Token close = null, temp = null, a = null;
+  ExprTree temporary = null;
+    jj_consume_token(OPEN);
     label_13:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case OPEN:
-        open = jj_consume_token(OPEN);
+        jj_consume_token(OPEN);
+        break;
+      case NOT:
+      case TRUE:
+      case FALSE:
+      case NUMBER:
+      case FLOATING_POINT_LITERAL:
+      case QUOTE:
+        temporary = exprTerm();
+      if (lhs == null)
+      {
+        lhs = temporary;
+      }
+      else
+      {
+        rhs = temporary;
+        if (rootOp != null)
+        {
+          lhs = new ExprTree(rootOp, lhs, rhs);
+        }
+      }
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case CLOSE:
+          close = jj_consume_token(CLOSE);
+          break;
+        default:
+          jj_la1[33] = jj_gen;
+          ;
+        }
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case MULTIPLY:
+        case DIVIDE:
+        case PLUS:
+        case MINUS:
+          switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+          case MULTIPLY:
+            temp = jj_consume_token(MULTIPLY);
+        rootOp = ExprTree.OpCode.MULT;
+            break;
+          case DIVIDE:
+            jj_consume_token(DIVIDE);
+        rootOp = ExprTree.OpCode.DIV;
+            break;
+          case PLUS:
+            jj_consume_token(PLUS);
+        rootOp = ExprTree.OpCode.ADD;
+            break;
+          case MINUS:
+            jj_consume_token(MINUS);
+        rootOp = ExprTree.OpCode.SUB;
+            break;
+          default:
+            jj_la1[34] = jj_gen;
+            jj_consume_token(-1);
+            throw new ParseException();
+          }
+          break;
+        default:
+          jj_la1[35] = jj_gen;
+          ;
+        }
         break;
       default:
-        jj_la1[32] = jj_gen;
-        ;
+        jj_la1[36] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case NOT:
+      case TRUE:
+      case FALSE:
       case NUMBER:
-        lc = jj_consume_token(NUMBER);
+      case FLOATING_POINT_LITERAL:
+      case QUOTE:
+      case OPEN:
+        ;
         break;
       default:
-        jj_la1[33] = jj_gen;
-        ;
+        jj_la1[37] = jj_gen;
+        break label_13;
       }
+    }
+    {if (true) return lhs;}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public ExprTree exprTerm() throws ParseException {
+  Token lc = null, rc = null, exp = null, notCheck = null, checkQuote = null;
+  ExprTree.OpCode rootOp = null;
+  ExprTree rhs = null;
+  ExprTree rootExpr = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case NOT:
+      notCheck = jj_consume_token(NOT);
+      break;
+    default:
+      jj_la1[38] = jj_gen;
+      ;
+    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case FLOATING_POINT_LITERAL:
+      lc = jj_consume_token(FLOATING_POINT_LITERAL);
+      break;
+    case NUMBER:
+      lc = jj_consume_token(NUMBER);
+      break;
+    case TRUE:
+      lc = jj_consume_token(TRUE);
+      break;
+    case FALSE:
+      lc = jj_consume_token(FALSE);
+      break;
+    case QUOTE:
+      lc = jj_consume_token(QUOTE);
+      break;
+    default:
+      jj_la1[39] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case AND:
+    case OR:
+    case STRING_LITERAL:
+    case STRING_SLASH:
+    case MULTIPLY:
+    case DIVIDE:
+    case PLUS:
+    case MINUS:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case MULTIPLY:
         exp = jj_consume_token(MULTIPLY);
@@ -805,76 +960,110 @@ public class SQLParser implements SQLParserConstants {
       case MINUS:
         exp = jj_consume_token(MINUS);
         break;
+      case AND:
+        exp = jj_consume_token(AND);
+        break;
+      case OR:
+        exp = jj_consume_token(OR);
+        break;
+      case STRING_LITERAL:
+        exp = jj_consume_token(STRING_LITERAL);
+        break;
+      case STRING_SLASH:
+        exp = jj_consume_token(STRING_SLASH);
+        break;
       default:
-        jj_la1[34] = jj_gen;
+        jj_la1[40] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
-      rc = jj_consume_token(NUMBER);
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case CLOSE:
-        jj_consume_token(CLOSE);
-        break;
-      default:
-        jj_la1[35] = jj_gen;
-        ;
-      }
-      if (exp == null)
-      {
-        {if (true) return (new ExprTree.ConstLeaf(Integer.parseInt(lc.image)));}
-      }
-      if (lhs == null)
-      {
-        if (exp.image.equals("+"))
-        {
-          rootExpr = new ExprTree(ExprTree.OpCode.ADD, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
-        }
-        else if (exp.image.equals("-"))
-        {
-          rootExpr = new ExprTree(ExprTree.OpCode.SUB, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
-        }
-        else if (exp.image.equals("*"))
-        {
-          rootExpr = new ExprTree(ExprTree.OpCode.MULT, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
-        }
-        else if (exp.image.equals("/"))
-        {
-          rootExpr = new ExprTree(ExprTree.OpCode.DIV, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
-        }
-        lhs = rootExpr;
-      }
-      else if (lhs != null)
-      {
-        if (exp.image.equals("+"))
-        {
-          rootExpr = new ExprTree(ExprTree.OpCode.ADD, lhs, new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
-        }
-        else if (exp.image.equals("-"))
-        {
-          rootExpr = new ExprTree(ExprTree.OpCode.SUB, lhs, new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
-        }
-        else if (exp.image.equals("*"))
-        {
-          rootExpr = new ExprTree(ExprTree.OpCode.MULT, lhs, new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
-        }
-        else if (exp.image.equals("/"))
-        {
-          rootExpr = new ExprTree(ExprTree.OpCode.DIV, lhs, new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
-        }
-      }
+      break;
+    default:
+      jj_la1[41] = jj_gen;
+      ;
+    }
+    if (exp == null)
+    {
+      if (notCheck != null) {if (true) return new ExprTree(ExprTree.OpCode.NOT, new ExprTree.ConstLeaf(Boolean.parseBoolean(lc.image)));}
+      else if (lc.image.toUpperCase().equals("TRUE") || lc.image.toUpperCase().equals("FALSE")) {if (true) return new ExprTree.ConstLeaf(Boolean.parseBoolean(lc.image));}
+      else {if (true) return new ExprTree.ConstLeaf(Integer.parseInt(lc.image));}
+    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case TRUE:
+    case FALSE:
+    case NUMBER:
+    case QUOTE:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case NUMBER:
-      case MULTIPLY:
-      case DIVIDE:
-      case PLUS:
-      case MINUS:
-      case OPEN:
-        ;
+        rc = jj_consume_token(NUMBER);
+        break;
+      case TRUE:
+        rc = jj_consume_token(TRUE);
+        break;
+      case FALSE:
+        rc = jj_consume_token(FALSE);
+        break;
+      case QUOTE:
+        rc = jj_consume_token(QUOTE);
         break;
       default:
-        jj_la1[36] = jj_gen;
-        break label_13;
+        jj_la1[42] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
+      break;
+    default:
+      jj_la1[43] = jj_gen;
+      ;
+    }
+    if (lc.image.equals("'"))
+    {
+      String t = exp.image;
+      if (t.contains("\u005c\u005c\u005c\u005c'"))
+      {
+        t = t.replace("\u005c\u005c\u005c\u005c'", "\u005c\u005c");
+      }
+      else if (t.contains("\u005c\u005c'"))
+      {
+        t = t.replace("\u005c\u005c'", "''");
+      }
+      else
+      {
+        t = t.replace("'", "");
+        if (t.contains("\u005c\u005c")) t = t.replace("\u005c\u005c", "'");
+        if (t.contains("\u005c\u005c'"))
+        {}
+        else
+        {
+          t = t.replace("'", "\u005c\u005c");
+        }
+      }
+      t = t.replace("'''", "'");
+      rootExpr = new ExprTree.ConstLeaf(t);
+    }
+    else if (exp.image.equals("+"))
+    {
+      rootExpr = new ExprTree(ExprTree.OpCode.ADD, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
+    }
+    else if (exp.image.equals("-"))
+    {
+      rootExpr = new ExprTree(ExprTree.OpCode.SUB, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
+    }
+    else if (exp.image.equals("*"))
+    {
+      rootExpr = new ExprTree(ExprTree.OpCode.MULT, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
+    }
+    else if (exp.image.equals("/"))
+    {
+      rootExpr = new ExprTree(ExprTree.OpCode.DIV, new ExprTree.ConstLeaf(Integer.parseInt(lc.image)), new ExprTree.ConstLeaf(Integer.parseInt(rc.image)));
+    }
+    else if (exp.image.equals("AND"))
+    {
+      rootExpr = new ExprTree(ExprTree.OpCode.AND, new ExprTree.ConstLeaf(Boolean.parseBoolean(lc.image)), new ExprTree.ConstLeaf(Boolean.parseBoolean(rc.image)));
+    }
+    else if (exp.image.equals("OR"))
+    {
+      rootExpr = new ExprTree(ExprTree.OpCode.OR, new ExprTree.ConstLeaf(Boolean.parseBoolean(lc.image)), new ExprTree.ConstLeaf(Boolean.parseBoolean(rc.image)));
     }
     {if (true) return rootExpr;}
     throw new Error("Missing return statement in function");
@@ -917,7 +1106,7 @@ public class SQLParser implements SQLParserConstants {
         rootOpCode = ExprTree.OpCode.GTE;
       break;
     default:
-      jj_la1[37] = jj_gen;
+      jj_la1[44] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -939,7 +1128,7 @@ public class SQLParser implements SQLParserConstants {
   static public Token jj_nt;
   static private int jj_ntk;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[38];
+  static final private int[] jj_la1 = new int[45];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -947,10 +1136,10 @@ public class SQLParser implements SQLParserConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x80,0x100000,0x0,0x20100000,0x100000,0x0,0x0,0x0,0x0,0x10000,0x0,0x20100000,0x200,0x200,0x200,0x200,0x100000,0x100000,0x400,0x800,0x100,0x4000,0x40,0x100000,0x0,0x0,0x88000,0x0,0x0,0x0,0x0,0x88000,0x0,0x20000000,0x0,0x0,0x20000000,0x0,};
+      jj_la1_0 = new int[] {0x80,0x1000000,0x0,0x1700000,0x10000,0x1000000,0x0,0x0,0x0,0x10000,0x10000,0x0,0x1700000,0x200,0x200,0x200,0x200,0x1000000,0x1000000,0x400,0x800,0x100,0x4000,0x40,0x1000000,0x0,0x0,0x88000,0x0,0x0,0x0,0x0,0x88000,0x0,0x0,0x0,0x700000,0x700000,0x100000,0x600000,0x3088000,0x3088000,0x600000,0x600000,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x2,0x5e00,0x200,0x1e00,0x1e00,0x4004,0x4004,0x0,0x2,0x5e00,0x2,0x2,0x2,0x2,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x4000,0x4000,0x8000,0x0,0x4000,0x8000,0x4000,0x8000,0x0,0x4000,0x0,0x1e00,0x8000,0x5e00,0x1f8,};
+      jj_la1_1 = new int[] {0x0,0x0,0x80,0x18002c,0x100100,0x8000,0x78000,0x78000,0x200000,0x100100,0x0,0x80,0x18002c,0x80,0x80,0x80,0x80,0x0,0x0,0x0,0x0,0x0,0x40,0x0,0x100000,0x100000,0x200000,0x0,0x100000,0x200000,0x100000,0x200000,0x0,0x200000,0x78000,0x78000,0x180024,0x180024,0x0,0x80024,0x78000,0x78000,0x80004,0x80004,0x7e00,};
    }
 
   /** Constructor with InputStream. */
@@ -971,7 +1160,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -985,7 +1174,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1002,7 +1191,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1012,7 +1201,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1028,7 +1217,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1037,7 +1226,7 @@ public class SQLParser implements SQLParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 45; i++) jj_la1[i] = -1;
   }
 
   static private Token jj_consume_token(int kind) throws ParseException {
@@ -1088,12 +1277,12 @@ public class SQLParser implements SQLParserConstants {
   /** Generate ParseException. */
   static public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[49];
+    boolean[] la1tokens = new boolean[55];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 38; i++) {
+    for (int i = 0; i < 45; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1105,7 +1294,7 @@ public class SQLParser implements SQLParserConstants {
         }
       }
     }
-    for (int i = 0; i < 49; i++) {
+    for (int i = 0; i < 55; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
